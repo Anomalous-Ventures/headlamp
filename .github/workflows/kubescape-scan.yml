@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   kubescape:
-    uses: Anomalous-Ventures/.github/.github/workflows/kubescape-scan.yml@main
+    uses: Anomalous-Ventures/devops/.github/workflows/kubescape-scan.yml@main
     with:
       scan-paths: "charts/"
       frameworks: "NSA,MITRE"
