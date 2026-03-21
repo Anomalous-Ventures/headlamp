@@ -35,23 +35,26 @@ jobs:
       run: |
         FILE_PATH=$(echo app/dist/Headlamp*x86_64*.AppImage); mv ${FILE_PATH} $(echo ${FILE_PATH}|sed s/x86_64/x64/)
     - name: Upload Tarball artifacts
-      uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+      continue-on-error: true
+      uses: Anomalous-Ventures/devops/.github/actions/upload-s3@66345e915e2b88f14e9d1426ec37d7247c75921c # main
       with:
         name: Tarballs
         path: ./app/dist/Headlamp*.tar.*
-        if-no-files-found: error
-        retention-days: 1
+        access-key: ${{ secrets.MINIO_ACCESS_KEY }}
+        secret-key: ${{ secrets.MINIO_SECRET_KEY }}
     - name: Upload AppImage artifacts
-      uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+      continue-on-error: true
+      uses: Anomalous-Ventures/devops/.github/actions/upload-s3@66345e915e2b88f14e9d1426ec37d7247c75921c # main
       with:
         name: AppImages
         path: ./app/dist/Headlamp*.AppImage
-        if-no-files-found: error
-        retention-days: 1
+        access-key: ${{ secrets.MINIO_ACCESS_KEY }}
+        secret-key: ${{ secrets.MINIO_SECRET_KEY }}
     - name: Upload Debian artifacts
-      uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+      continue-on-error: true
+      uses: Anomalous-Ventures/devops/.github/actions/upload-s3@66345e915e2b88f14e9d1426ec37d7247c75921c # main
       with:
         name: Debian
         path: ./app/dist/headlamp*.deb
-        if-no-files-found: error
-        retention-days: 1
+        access-key: ${{ secrets.MINIO_ACCESS_KEY }}
+        secret-key: ${{ secrets.MINIO_SECRET_KEY }}
