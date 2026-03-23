@@ -16,7 +16,7 @@ jobs:
   push_to_registry:
     if: ${{ github.repository == 'kubernetes-sigs/headlamp' }}
     name: Build and push nightly container image
-    runs-on: ubuntu-latest
+    runs-on: stax-builder
     permissions:
       packages: write
     steps:
@@ -28,6 +28,8 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
+        with:
+          driver-opts: network=host
 
       - name: Log in to the Container registry
         uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc # v2.2.0
