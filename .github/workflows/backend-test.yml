@@ -82,10 +82,13 @@ jobs:
 
       - name: Upload coverage report as artifact
         id: upload-artifact
-        uses: actions/upload-artifact@84480863f228bb9747b473957fcc9e309aa96097 # v4.4.2
+        continue-on-error: true
+        uses: Anomalous-Ventures/devops/.github/actions/upload-s3@66345e915e2b88f14e9d1426ec37d7247c75921c # main
         with:
           name: backend-coverage-report
           path: ./backend/backend_coverage.html
+          access-key: ${{ secrets.MINIO_ACCESS_KEY }}
+          secret-key: ${{ secrets.MINIO_SECRET_KEY }}
 
       - name: Get base branch code coverage
         if: ${{ github.event_name }} == 'pull_request'
@@ -154,7 +157,6 @@ jobs:
           testcoverage_full=$(echo "$testcoverage_full_base64" | base64 --decode)
 
           coverage_diff="${{ env.coverage_diff }}"
-          artifact_url=${{ steps.upload-artifact.outputs.artifact-url }}
 
           if (( $(echo "$coverage_diff < 0" | bc -l) )); then
             emoji="😞" # Decreased coverage
@@ -176,8 +178,6 @@ jobs:
           \`\`\`
 
           </details>
-
-          [Html coverage report download]($artifact_url)
           "
 
           echo "$comment"

@@ -40,15 +40,14 @@ jobs:
           # And it's free for you!
           publish_results: true
 
-      # Upload the results as artifacts (optional). Commenting out will disable
-      # uploads of run results in SARIF format to the repository Actions tab.
-      # https://docs.github.com/en/actions/advanced-guides/storing-workflow-data-as-artifacts
       - name: "Upload artifact"
-        uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+        continue-on-error: true
+        uses: Anomalous-Ventures/devops/.github/actions/upload-s3@66345e915e2b88f14e9d1426ec37d7247c75921c # main
         with:
           name: SARIF file
           path: results.sarif
-          retention-days: 5
+          access-key: ${{ secrets.MINIO_ACCESS_KEY }}
+          secret-key: ${{ secrets.MINIO_SECRET_KEY }}
 
       # Upload the results to GitHub's code scanning dashboard (optional).
       # Commenting out will disable upload of results to your repo's Code Scanning dashboard

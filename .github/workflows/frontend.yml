@@ -40,12 +40,52 @@ jobs:
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+
+      - name: Restore npm cache from S3
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          if ! command -v aws &>/dev/null; then
+            pip install --quiet awscli 2>/dev/null || pip3 install --quiet awscli 2>/dev/null
+          fi
+          HASH=$(sha256sum frontend/package-lock.json | cut -d' ' -f1)
+          CACHE_KEY="s3://ci-artifacts/${{ github.repository }}/npm-cache/${HASH}.tar.gz"
+          if aws s3 ls "$CACHE_KEY" --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null; then
+            aws s3 cp "$CACHE_KEY" /tmp/npm-cache.tar.gz --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null
+            mkdir -p ~/.npm
+            tar xzf /tmp/npm-cache.tar.gz -C ~/.npm 2>/dev/null || true
+            echo "npm cache restored from S3"
+          else
+            echo "No npm cache found, will create after install"
+          fi
 
       - name: Install dependencies
         run: |
           make frontend-install
+
+      - name: Save npm cache to S3
+        continue-on-error: true
+        if: success()
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          if ! command -v aws &>/dev/null; then
+            pip install --quiet awscli 2>/dev/null || pip3 install --quiet awscli 2>/dev/null
+          fi
+          HASH=$(sha256sum frontend/package-lock.json | cut -d' ' -f1)
+          CACHE_KEY="s3://ci-artifacts/${{ github.repository }}/npm-cache/${HASH}.tar.gz"
+          if ! aws s3 ls "$CACHE_KEY" --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null; then
+            tar czf /tmp/npm-cache.tar.gz -C ~/.npm . 2>/dev/null
+            aws s3 cp /tmp/npm-cache.tar.gz "$CACHE_KEY" --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null
+            echo "npm cache saved to S3"
+          else
+            echo "npm cache already exists, skipping upload"
+          fi
 
       - name: Run linter
         run: |
@@ -67,8 +107,27 @@ jobs:
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+
+      - name: Restore npm cache from S3
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          if ! command -v aws &>/dev/null; then
+            pip install --quiet awscli 2>/dev/null || pip3 install --quiet awscli 2>/dev/null
+          fi
+          HASH=$(sha256sum frontend/package-lock.json | cut -d' ' -f1)
+          CACHE_KEY="s3://ci-artifacts/${{ github.repository }}/npm-cache/${HASH}.tar.gz"
+          if aws s3 ls "$CACHE_KEY" --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null; then
+            aws s3 cp "$CACHE_KEY" /tmp/npm-cache.tar.gz --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null
+            mkdir -p ~/.npm
+            tar xzf /tmp/npm-cache.tar.gz -C ~/.npm 2>/dev/null || true
+            echo "npm cache restored from S3"
+          else
+            echo "No npm cache found, will create after install"
+          fi
 
       - name: Install dependencies
         run: |
@@ -97,8 +156,27 @@ jobs:
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+
+      - name: Restore npm cache from S3
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          if ! command -v aws &>/dev/null; then
+            pip install --quiet awscli 2>/dev/null || pip3 install --quiet awscli 2>/dev/null
+          fi
+          HASH=$(sha256sum frontend/package-lock.json | cut -d' ' -f1)
+          CACHE_KEY="s3://ci-artifacts/${{ github.repository }}/npm-cache/${HASH}.tar.gz"
+          if aws s3 ls "$CACHE_KEY" --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null; then
+            aws s3 cp "$CACHE_KEY" /tmp/npm-cache.tar.gz --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null
+            mkdir -p ~/.npm
+            tar xzf /tmp/npm-cache.tar.gz -C ~/.npm 2>/dev/null || true
+            echo "npm cache restored from S3"
+          else
+            echo "No npm cache found, will create after install"
+          fi
 
       - name: Install dependencies
         run: |
@@ -123,8 +201,27 @@ jobs:
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+
+      - name: Restore npm cache from S3
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          if ! command -v aws &>/dev/null; then
+            pip install --quiet awscli 2>/dev/null || pip3 install --quiet awscli 2>/dev/null
+          fi
+          HASH=$(sha256sum frontend/package-lock.json | cut -d' ' -f1)
+          CACHE_KEY="s3://ci-artifacts/${{ github.repository }}/npm-cache/${HASH}.tar.gz"
+          if aws s3 ls "$CACHE_KEY" --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null; then
+            aws s3 cp "$CACHE_KEY" /tmp/npm-cache.tar.gz --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null
+            mkdir -p ~/.npm
+            tar xzf /tmp/npm-cache.tar.gz -C ~/.npm 2>/dev/null || true
+            echo "npm cache restored from S3"
+          else
+            echo "No npm cache found, will create after install"
+          fi
 
       - name: Test plugins
         run: |
@@ -145,8 +242,27 @@ jobs:
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+
+      - name: Restore npm cache from S3
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          if ! command -v aws &>/dev/null; then
+            pip install --quiet awscli 2>/dev/null || pip3 install --quiet awscli 2>/dev/null
+          fi
+          HASH=$(sha256sum frontend/package-lock.json | cut -d' ' -f1)
+          CACHE_KEY="s3://ci-artifacts/${{ github.repository }}/npm-cache/${HASH}.tar.gz"
+          if aws s3 ls "$CACHE_KEY" --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null; then
+            aws s3 cp "$CACHE_KEY" /tmp/npm-cache.tar.gz --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null
+            mkdir -p ~/.npm
+            tar xzf /tmp/npm-cache.tar.gz -C ~/.npm 2>/dev/null || true
+            echo "npm cache restored from S3"
+          else
+            echo "No npm cache found, will create after install"
+          fi
 
       - name: Build docs
         run: |
@@ -167,8 +283,27 @@ jobs:
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+
+      - name: Restore npm cache from S3
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+        run: |
+          if ! command -v aws &>/dev/null; then
+            pip install --quiet awscli 2>/dev/null || pip3 install --quiet awscli 2>/dev/null
+          fi
+          HASH=$(sha256sum frontend/package-lock.json | cut -d' ' -f1)
+          CACHE_KEY="s3://ci-artifacts/${{ github.repository }}/npm-cache/${HASH}.tar.gz"
+          if aws s3 ls "$CACHE_KEY" --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null; then
+            aws s3 cp "$CACHE_KEY" /tmp/npm-cache.tar.gz --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null
+            mkdir -p ~/.npm
+            tar xzf /tmp/npm-cache.tar.gz -C ~/.npm 2>/dev/null || true
+            echo "npm cache restored from S3"
+          else
+            echo "No npm cache found, will create after install"
+          fi
 
       - name: Install dependencies
         run: |

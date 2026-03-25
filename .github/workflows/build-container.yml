@@ -94,13 +94,29 @@ jobs:
       # now you can run kubectl to see the pods in the cluster
     - name: Try the cluster!
       run: kubectl get pods -A
-    - name: Restore image-cache Folder
+    - name: Restore image cache from S3
       id: cache-image-restore2
-      uses: actions/cache/restore@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
-      with:
-        path: ~/image-cache
-        # cache the container image. All the paths this PR depends on except the e2e-tests folder for the key.
-        key: ${{ runner.os }}-image-${{ hashFiles('backend/pkg/**', 'backend/cmd/**', 'backend/go.*', 'frontend/src/**', 'frontend/package.json', 'frontend/package-lock.json', 'Makefile', '.github/workflows/build-container.yml', 'Dockerfile', 'Dockerfile.plugins') }}
+      continue-on-error: true
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+        AWS_DEFAULT_REGION: us-east-1
+      run: |
+        if ! command -v aws &>/dev/null; then
+          pip install --quiet awscli 2>/dev/null || pip3 install --quiet awscli 2>/dev/null
+        fi
+        HASH=${{ hashFiles('backend/pkg/**', 'backend/cmd/**', 'backend/go.*', 'frontend/src/**', 'frontend/package.json', 'frontend/package-lock.json', 'Makefile', '.github/workflows/build-container.yml', 'Dockerfile', 'Dockerfile.plugins') }}
+        CACHE_KEY="s3://ci-artifacts/${{ github.repository }}/image-cache/${HASH}.tar.gz"
+        if aws s3 ls "$CACHE_KEY" --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null; then
+          aws s3 cp "$CACHE_KEY" /tmp/image-cache.tar.gz --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null
+          mkdir -p ~/image-cache
+          tar xzf /tmp/image-cache.tar.gz -C ~/image-cache 2>/dev/null || true
+          echo "cache-hit=true" >> "$GITHUB_OUTPUT"
+          echo "Image cache restored from S3"
+        else
+          echo "cache-hit=false" >> "$GITHUB_OUTPUT"
+          echo "No image cache found"
+        fi
     - name: Restore Cached Docker Images
       if: steps.cache-image-restore2.outputs.cache-hit == 'true'
       run: |
@@ -319,16 +335,28 @@ jobs:
         mkdir -p ~/image-cache
         docker save ghcr.io/headlamp-k8s/headlamp-plugins-test | gzip -9 > ~/image-cache/headlamp-plugins-test.tar.gz
         docker save ghcr.io/headlamp-k8s/headlamp | gzip -9 > ~/image-cache/headlamp.tar.gz
-    - name: Cache image-cache Folder
+    - name: Save image cache to S3
       if: steps.cache-image-restore2.outputs.cache-hit != 'true'
-      id: cache-image-save
-      uses: actions/cache/save@0c907a75c2c80ebcb7f088228285e798b750cf8f # v4.2.1
-      with:
-        path: ~/image-cache
-        key: ${{ steps.cache-image-restore2.outputs.cache-primary-key }}
-    - uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+      continue-on-error: true
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+        AWS_DEFAULT_REGION: us-east-1
+      run: |
+        if ! command -v aws &>/dev/null; then
+          pip install --quiet awscli 2>/dev/null || pip3 install --quiet awscli 2>/dev/null
+        fi
+        HASH=${{ hashFiles('backend/pkg/**', 'backend/cmd/**', 'backend/go.*', 'frontend/src/**', 'frontend/package.json', 'frontend/package-lock.json', 'Makefile', '.github/workflows/build-container.yml', 'Dockerfile', 'Dockerfile.plugins') }}
+        CACHE_KEY="s3://ci-artifacts/${{ github.repository }}/image-cache/${HASH}.tar.gz"
+        tar czf /tmp/image-cache-bundle.tar.gz -C ~/image-cache . 2>/dev/null
+        aws s3 cp /tmp/image-cache-bundle.tar.gz "$CACHE_KEY" --endpoint-url https://minio.spooty.io --no-verify-ssl 2>/dev/null
+        echo "Image cache saved to S3"
+    - name: Upload e2e test report
+      continue-on-error: true
       if: always()
+      uses: Anomalous-Ventures/devops/.github/actions/upload-s3@66345e915e2b88f14e9d1426ec37d7247c75921c # main
       with:
         name: e2e-tests-report
         path: e2e-tests/playwright-report/
-        retention-days: 30
+        access-key: ${{ secrets.MINIO_ACCESS_KEY }}
+        secret-key: ${{ secrets.MINIO_SECRET_KEY }}
