@@ -1,0 +1,101 @@
+# Weekly dependency patches across all configured ecosystems.
+version: 2
+updates:
+- package-ecosystem: docker
+  directories:
+  - /
+  - /docker-extension
+  multi-ecosystem-group: weekly-patches
+  patterns:
+  - '*'
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+- package-ecosystem: docker-compose
+  directory: /docker-extension
+  multi-ecosystem-group: weekly-patches
+  patterns:
+  - '*'
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+- package-ecosystem: github-actions
+  directory: /
+  multi-ecosystem-group: weekly-patches
+  patterns:
+  - '*'
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+- package-ecosystem: gomod
+  directory: /backend
+  multi-ecosystem-group: weekly-patches
+  patterns:
+  - '*'
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+- package-ecosystem: helm
+  directory: /charts/headlamp
+  multi-ecosystem-group: weekly-patches
+  patterns:
+  - '*'
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+- package-ecosystem: npm
+  directories:
+  - /
+  - /app
+  - /app/e2e-tests
+  - /app/scripts/push-release-assets
+  - /e2e-tests
+  - /eslint-config
+  - /frontend
+  - /load-tests
+  - /plugins/examples/activity
+  - /plugins/examples/app-menus
+  - /plugins/examples/change-logo
+  - /plugins/examples/cluster-chooser
+  - /plugins/examples/custom-theme
+  - /plugins/examples/customizing-map
+  - /plugins/examples/details-view
+  - /plugins/examples/dynamic-clusters
+  - /plugins/examples/headlamp-events
+  - /plugins/examples/pod-counter
+  - /plugins/examples/projects
+  - /plugins/examples/resource-charts
+  - /plugins/examples/sidebar
+  - /plugins/examples/tables
+  - /plugins/examples/ui-panels
+  - /plugins/headlamp-plugin
+  - /plugins/headlamp-plugin/template
+  - /plugins/pluginctl
+  - /tools/i18n
+  - /tools/releaser
+  multi-ecosystem-group: weekly-patches
+  patterns:
+  - '*'
+  ignore:
+  - dependency-name: '*'
+    update-types:
+    - version-update:semver-major
+    - version-update:semver-minor
+multi-ecosystem-groups:
+  weekly-patches:
+    schedule:
+      interval: weekly
+      day: monday
+      time: 09:00
+      timezone: America/Los_Angeles
+    open-pull-requests-limit: 1
